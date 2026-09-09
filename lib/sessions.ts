@@ -1,11 +1,10 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import { BOOKABLE_SLOTS } from "@/lib/constants";
-import { getUpcomingThursdays, isThursdayOver, parisNow } from "@/lib/dates";
+import { getUpcomingThursdays, isThursdayOver } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { rumpSessions, slots } from "@/db/schema";
 
 export async function closePastSessions() {
-  const now = parisNow();
   const openSessions = await db
     .select()
     .from(rumpSessions)

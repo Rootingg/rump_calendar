@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { TalkTimeline } from "@/components/talk-timeline";
 import { formatFrenchLong, padRumpNumber, talkLabel } from "@/lib/dates";
-import { getApprovedTalks, getNextPublicSession, getSessionDetail } from "@/lib/queries";
+import { getNextPublicSession, getSessionDetail } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const nextSession = await getNextPublicSession();
   const detail = nextSession ? await getSessionDetail(nextSession.id) : null;
-  const talks = nextSession ? await getApprovedTalks(nextSession.id) : [];
 
   return (
     <div className="space-y-12">
@@ -50,7 +49,7 @@ export default async function HomePage() {
         </Link>
       </section>
 
-      {talks.length === 0 && detail ? (
+      {detail && detail.approvedCount === 0 ? (
         <p className="text-center text-sm text-muted">
           Les talks officiels apparaîtront ici dès qu’un admin les aura validés.
         </p>
