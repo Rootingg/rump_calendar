@@ -108,7 +108,6 @@ export async function getSessionDetail(sessionId: string) {
     .orderBy(asc(slots.position));
 
   const approved = await getApprovedTalks(sessionId);
-  const approvedBySlot = new Map(approved.map((talk) => [talk.startTime, talk]));
 
   return {
     session,
@@ -118,7 +117,6 @@ export async function getSessionDetail(sessionId: string) {
     })),
     approvedCount: approved.length,
     availableCount: Math.max(SLOTS_PER_SESSION - approved.length, 0),
-    approvedBySlot,
   };
 }
 

@@ -21,8 +21,6 @@ export async function closePastSessions() {
     .update(rumpSessions)
     .set({ status: "DONE" })
     .where(inArray(rumpSessions.id, expiredIds));
-
-  void now;
 }
 
 export async function ensureUpcomingSessions(weeks = 12) {
