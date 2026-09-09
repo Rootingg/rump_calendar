@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApproveButton, RejectForm } from "@/components/admin-actions";
 import { StatusBadge } from "@/components/status-badge";
+import { durationLabel } from "@/lib/constants";
 import { formatFrenchLong } from "@/lib/dates";
 import { getApplicationDetail } from "@/lib/queries";
 
@@ -38,7 +39,7 @@ export default async function ApplicationDetailPage({
         <Row label="Description" value={application.description} />
         <Row label="Discipline" value={application.discipline} />
         <Row label="Niveau" value={application.level} />
-        <Row label="Durée" value="8 minutes" />
+        <Row label="Durée" value={durationLabel()} />
         <Row label="Jeudi demandé" value={formatFrenchLong(application.date)} />
         <Row
           label="Créneau demandé"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { DISCIPLINES, LEVELS } from "@/lib/constants";
+import { DISCIPLINES, LEVELS, durationLabel, slotKindLabel } from "@/lib/constants";
 import { formatFrenchLong, padRumpNumber } from "@/lib/dates";
 import { proposeTalkAction, type ProposeState } from "@/lib/actions/talks";
 
@@ -13,6 +13,7 @@ type Option = {
     id: string;
     startTime: string;
     endTime: string;
+    kind: string;
     taken: boolean;
   }[];
 };
@@ -93,7 +94,7 @@ export function ProposeForm({
         <span className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-muted">
           Durée
         </span>
-        <input className="field" value="8 minutes" readOnly />
+        <input className="field" value={durationLabel()} readOnly />
       </label>
 
       <label className="block">
@@ -136,7 +137,8 @@ export function ProposeForm({
               {slot.startTime} — {slot.endTime}
             </span>
             <span className="text-[10px] uppercase tracking-[0.14em]">
-              {slot.taken ? "Occupé" : "Disponible"}
+              {slotKindLabel(slot.kind)}
+              {slot.taken ? " · Occupé" : ""}
             </span>
           </label>
         ))}

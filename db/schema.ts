@@ -22,6 +22,7 @@ export const applicationStatusEnum = pgEnum("application_status", [
   "SLOT_UNAVAILABLE",
   "COMPLETED",
 ]);
+export const slotKindEnum = pgEnum("slot_kind", ["TECHNIQUE", "WTF"]);
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -53,6 +54,7 @@ export const slots = pgTable(
     startTime: text("start_time").notNull(),
     endTime: text("end_time").notNull(),
     position: integer("position").notNull(),
+    kind: slotKindEnum("kind").notNull().default("TECHNIQUE"),
   },
   (table) => [
     uniqueIndex("slots_session_position").on(table.rumpSessionId, table.position),

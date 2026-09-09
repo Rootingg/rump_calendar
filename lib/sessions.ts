@@ -39,16 +39,45 @@ async function createSession(date: string, number: number) {
     })
     .returning();
 
+  await insertSlots(session.id);
+  return session;
+}
+
+async function insertSlots(sessionId: string) {
   await db.insert(slots).values(
     BOOKABLE_SLOTS.map((slot) => ({
-      rumpSessionId: session.id,
+      rumpSessionId: sessionId,
       startTime: slot.start,
       endTime: slot.end,
       position: slot.position,
+      kind: slot.kind,
     })),
   );
+}
 
-  return session;
+async function syncSessionSlots(sessionId: string) {
+  const existing = await db
+    .select()
+    .from(slots)
+    .where(eq(slots.rumpSessionId, sessionId))
+    .orderBy(asc(slots.position));
+
+  const inSync =
+    existing.length === BOOKABLE_SLOTS.length &&
+    existing.every((slot, index) => {
+      const expected = BOOKABLE_SLOTS[index];
+      return (
+        slot.startTime === expected.start &&
+        slot.endTime === expected.end &&
+        slot.position === expected.position &&
+        slot.kind === expected.kind
+      );
+    });
+
+  if (inSync) return;
+
+  await db.delete(slots).where(eq(slots.rumpSessionId, sessionId));
+  await insertSlots(sessionId);
 }
 
 async function renumberSessions() {
@@ -91,6 +120,11 @@ export async function ensureUpcomingSessions() {
       await createSession(date, nextNumber);
       nextNumber += 1;
     }
+  }
+
+  const allSessions = await db.select({ id: rumpSessions.id }).from(rumpSessions);
+  for (const session of allSessions) {
+    await syncSessionSlots(session.id);
   }
 
   await renumberSessions();

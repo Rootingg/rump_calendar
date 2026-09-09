@@ -170,6 +170,7 @@ export async function getProposeOptions() {
         id: slot.id,
         startTime: slot.startTime,
         endTime: slot.endTime,
+        kind: slot.kind,
         taken: taken.has(slot.id),
       })),
   }));
