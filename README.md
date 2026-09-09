@@ -27,6 +27,7 @@ Variables d’environnement à ajouter dans le projet Vercel :
 
 - `DATABASE_URL`
 - `DATABASE_URL_UNPOOLED`
-- `AUTH_SECRET`
-- `AUTH_TRUST_HOST=true`
+- `AUTH_SECRET` (obligatoire, même valeur que `.env.local`)
+- `AUTH_URL` = `https://rump.oterihack.com`
+- `AUTH_TRUST_HOST` = `true`
 - `ADMIN_PASSWORD` (uniquement pour le seed local)

@@ -3,10 +3,21 @@
 import { hash } from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { signIn } from "@/auth";
 import { db } from "@/lib/db";
 import { users } from "@/db/schema";
+
+function authErrorMessage(error: AuthError) {
+  if (error.type === "CredentialsSignin") {
+    return "Email ou mot de passe incorrect.";
+  }
+  if (error.type === "MissingSecret" || error.type === "UntrustedHost") {
+    return "Configuration Auth manquante (AUTH_SECRET / AUTH_URL).";
+  }
+  return "Connexion impossible pour le moment.";
+}
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Le nom doit contenir au moins 2 caractères."),
@@ -60,16 +71,16 @@ export async function registerAction(
     await signIn("credentials", {
       email,
       password: parsed.data.password,
-      redirectTo: "/profil",
+      redirect: false,
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      return { error: "Compte créé, mais la connexion a échoué." };
+      return { error: authErrorMessage(error) };
     }
     throw error;
   }
 
-  return {};
+  redirect("/profil");
 }
 
 export async function loginAction(
@@ -92,14 +103,14 @@ export async function loginAction(
     await signIn("credentials", {
       email: parsed.data.email.toLowerCase(),
       password: parsed.data.password,
-      redirectTo: callbackUrl.startsWith("/") ? callbackUrl : "/profil",
+      redirect: false,
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      return { error: "Email ou mot de passe incorrect." };
+      return { error: authErrorMessage(error) };
     }
     throw error;
   }
 
-  return {};
+  redirect(callbackUrl.startsWith("/") ? callbackUrl : "/profil");
 }
