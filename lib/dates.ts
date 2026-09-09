@@ -110,3 +110,13 @@ export function slotLabel(count: number) {
     ? `${count} créneau disponible`
     : `${count} créneaux disponibles`;
 }
+
+export function occupancyLabel(approvedCount: number, availableCount: number) {
+  const occupied =
+    approvedCount <= 1 ? `${approvedCount} occupé` : `${approvedCount} occupés`;
+  const available =
+    availableCount <= 1
+      ? `${availableCount} disponible`
+      : `${availableCount} disponibles`;
+  return `${occupied} · ${available}`;
+}

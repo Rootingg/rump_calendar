@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { generateSessionsAction } from "@/lib/actions/admin";
-import { formatFrenchLong, padRumpNumber } from "@/lib/dates";
+import { formatFrenchLong, occupancyLabel, padRumpNumber } from "@/lib/dates";
 import { getAdminOverview } from "@/lib/queries";
 import { SLOTS_PER_SESSION } from "@/lib/constants";
 
@@ -65,9 +65,8 @@ export default async function AdminPage() {
                 </p>
               </div>
               <p className="text-sm text-muted">
-                {SLOTS_PER_SESSION} créneaux · {session.approvedCount} occupé
-                {session.approvedCount > 1 ? "s" : ""} · {session.availableCount} disponible
-                {session.availableCount > 1 ? "s" : ""}
+                {SLOTS_PER_SESSION} créneaux ·{" "}
+                {occupancyLabel(session.approvedCount, session.availableCount)}
               </p>
             </div>
           ))}
