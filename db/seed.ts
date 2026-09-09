@@ -4,7 +4,8 @@ import { and, eq } from "drizzle-orm";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
-import { BOOKABLE_SLOTS } from "../lib/constants";
+import { DEFAULT_FIRST_SESSION_DATE } from "../lib/settings";
+import { applyFirstSessionDate } from "../lib/sessions";
 import { getUpcomingThursdays } from "../lib/dates";
 
 loadEnvConfig(process.cwd());
@@ -45,37 +46,7 @@ async function upsertUser(
 }
 
 async function ensureSessions() {
-  const dates = getUpcomingThursdays(12);
-  const existing = await db.select().from(rumpSessions);
-  const existingDates = new Set(existing.map((session) => session.date));
-  let nextNumber =
-    existing.reduce((max, session) => Math.max(max, session.number), 0) + 1;
-
-  for (const date of dates) {
-    if (existingDates.has(date)) continue;
-
-    const [session] = await db
-      .insert(rumpSessions)
-      .values({
-        date,
-        startTime: "18:00",
-        endTime: "19:00",
-        number: nextNumber,
-        status: "OPEN",
-      })
-      .returning();
-
-    await db.insert(slots).values(
-      BOOKABLE_SLOTS.map((slot) => ({
-        rumpSessionId: session.id,
-        startTime: slot.start,
-        endTime: slot.end,
-        position: slot.position,
-      })),
-    );
-
-    nextNumber += 1;
-  }
+  await applyFirstSessionDate(DEFAULT_FIRST_SESSION_DATE);
 }
 
 async function findSessionByDate(date: string) {
@@ -112,8 +83,12 @@ async function seedTalks(demoUsers: {
     return;
   }
 
-  const showcase = (await findSessionByDate("2026-09-24")) ?? (await findSessionByDate(getUpcomingThursdays(3)[1] ?? getUpcomingThursdays(1)[0]));
-  const conflict = (await findSessionByDate("2026-10-01")) ?? (await findSessionByDate(getUpcomingThursdays(4)[2] ?? getUpcomingThursdays(2)[1]));
+  const showcase =
+    (await findSessionByDate(DEFAULT_FIRST_SESSION_DATE)) ??
+    (await findSessionByDate(getUpcomingThursdays(3, DEFAULT_FIRST_SESSION_DATE)[0]));
+  const conflict =
+    (await findSessionByDate("2026-10-08")) ??
+    (await findSessionByDate(getUpcomingThursdays(4, DEFAULT_FIRST_SESSION_DATE)[1]));
 
   if (!showcase) {
     console.log("No showcase session found.");

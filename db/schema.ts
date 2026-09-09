@@ -93,6 +93,11 @@ export const talkApplications = pgTable(
   ],
 );
 
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type RumpSession = typeof rumpSessions.$inferSelect;
 export type Slot = typeof slots.$inferSelect;

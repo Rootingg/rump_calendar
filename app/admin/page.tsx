@@ -1,13 +1,18 @@
 import Link from "next/link";
+import { FirstSessionForm } from "@/components/first-session-form";
 import { generateSessionsAction } from "@/lib/actions/admin";
 import { formatFrenchLong, occupancyLabel, padRumpNumber } from "@/lib/dates";
 import { getAdminOverview } from "@/lib/queries";
+import { getFirstSessionDate } from "@/lib/settings";
 import { SLOTS_PER_SESSION } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const { upcoming, pending } = await getAdminOverview();
+  const [{ upcoming, pending }, firstSessionDate] = await Promise.all([
+    getAdminOverview(),
+    getFirstSessionDate(),
+  ]);
 
   return (
     <div className="space-y-10">
@@ -27,6 +32,8 @@ export default async function AdminPage() {
           </form>
         </div>
       </header>
+
+      <FirstSessionForm currentDate={firstSessionDate} />
 
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="border border-line px-4 py-4">

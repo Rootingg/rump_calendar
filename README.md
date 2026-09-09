@@ -21,3 +21,14 @@ npm run dev
 
 - Admin : `admin@oterihack.fr` / `AdminRump2026`
 - Membre : `lucas@oterihack.fr` / `DemoRump2026`
+
+## Vercel
+
+Le Framework Preset doit être **Next.js**, pas Other. Sinon Vercel sert `public/` en statique et la home renvoie 404.
+
+Variables d’environnement à ajouter dans le projet Vercel :
+
+- `DATABASE_URL`
+- `DATABASE_URL_UNPOOLED`
+- `AUTH_SECRET`
+- `AUTH_TRUST_HOST=true`

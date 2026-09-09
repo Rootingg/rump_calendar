@@ -4,7 +4,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { ensureUpcomingSessions } from "@/lib/sessions";
+import { applyFirstSessionDate, ensureUpcomingSessions } from "@/lib/sessions";
 import { talkApplications } from "@/db/schema";
 
 async function requireAdmin() {
@@ -122,4 +122,34 @@ export async function generateSessionsAction() {
   await requireAdmin();
   await ensureUpcomingSessions(12);
   revalidatePublic();
+}
+
+export type FirstSessionState = {
+  error?: string;
+  success?: string;
+};
+
+export async function setFirstSessionDateAction(
+  _prev: FirstSessionState | undefined,
+  formData: FormData,
+): Promise<FirstSessionState> {
+  await requireAdmin();
+
+  const date = String(formData.get("firstSessionDate") ?? "").trim();
+
+  try {
+    await applyFirstSessionDate(date);
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Impossible d'enregistrer cette date.",
+    };
+  }
+
+  revalidatePublic();
+  return {
+    success: "Première RUMP enregistrée. Le planning a été régénéré.",
+  };
 }

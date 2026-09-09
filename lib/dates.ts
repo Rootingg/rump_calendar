@@ -46,9 +46,14 @@ export function isThursdayOver(iso: string) {
   return now.hour >= 19;
 }
 
-export function getUpcomingThursdays(count: number) {
+export function isThursdayIso(iso: string) {
+  return weekdayOfIso(iso) === 4;
+}
+
+export function getUpcomingThursdays(count: number, startFrom?: string) {
+  const today = parisNow().date;
   const dates: string[] = [];
-  let cursor = parisNow().date;
+  let cursor = startFrom && startFrom > today ? startFrom : today;
 
   while (dates.length < count) {
     if (weekdayOfIso(cursor) === 4 && !isThursdayOver(cursor)) {
