@@ -50,13 +50,32 @@ export function isThursdayIso(iso: string) {
   return weekdayOfIso(iso) === 4;
 }
 
-export function getUpcomingThursdays(count: number, startFrom?: string) {
+export function getUpcomingThursdays(
+  count: number,
+  startFrom?: string,
+  endDate?: string,
+) {
   const today = parisNow().date;
   const dates: string[] = [];
   let cursor = startFrom && startFrom > today ? startFrom : today;
 
   while (dates.length < count) {
+    if (endDate && cursor > endDate) break;
     if (weekdayOfIso(cursor) === 4 && !isThursdayOver(cursor)) {
+      dates.push(cursor);
+    }
+    cursor = addCalendarDays(cursor, 1);
+  }
+
+  return dates;
+}
+
+export function getThursdaysBetween(startDate: string, endDate: string) {
+  const dates: string[] = [];
+  let cursor = startDate;
+
+  while (cursor <= endDate) {
+    if (isThursdayIso(cursor)) {
       dates.push(cursor);
     }
     cursor = addCalendarDays(cursor, 1);

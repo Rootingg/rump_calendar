@@ -3,7 +3,7 @@ import { SLOTS_PER_SESSION } from "@/lib/constants";
 import { isThursdayOver, parisNow } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { closePastSessions, ensureUpcomingSessions } from "@/lib/sessions";
-import { getFirstSessionDate } from "@/lib/settings";
+import { getSeasonBounds } from "@/lib/settings";
 import {
   rumpSessions,
   slots,
@@ -12,17 +12,17 @@ import {
 } from "@/db/schema";
 
 export async function prepareCalendar() {
-  await ensureUpcomingSessions(12);
+  await ensureUpcomingSessions();
   await closePastSessions();
 }
 
 export async function getPlanningSessions() {
   await prepareCalendar();
 
-  const firstDate = await getFirstSessionDate();
+  const { first, last } = await getSeasonBounds();
   const sessions = (
     await db.select().from(rumpSessions).orderBy(asc(rumpSessions.date))
-  ).filter((session) => session.date >= firstDate);
+  ).filter((session) => session.date >= first && session.date <= last);
 
   const sessionIds = sessions.map((session) => session.id);
   if (sessionIds.length === 0) return [];
@@ -124,8 +124,8 @@ export async function getSessionDetail(sessionId: string) {
 export async function getProposeOptions() {
   await prepareCalendar();
   const today = parisNow().date;
-  const firstDate = await getFirstSessionDate();
-  const floor = firstDate > today ? firstDate : today;
+  const { first, last } = await getSeasonBounds();
+  const floor = first > today ? first : today;
 
   const sessions = await db
     .select()
@@ -133,7 +133,9 @@ export async function getProposeOptions() {
     .where(eq(rumpSessions.status, "OPEN"))
     .orderBy(asc(rumpSessions.date));
 
-  const openSessions = sessions.filter((session) => session.date >= floor);
+  const openSessions = sessions.filter(
+    (session) => session.date >= floor && session.date <= last,
+  );
   if (openSessions.length === 0) return [];
 
   const sessionIds = openSessions.map((session) => session.id);

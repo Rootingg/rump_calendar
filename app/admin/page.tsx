@@ -3,15 +3,15 @@ import { FirstSessionForm } from "@/components/first-session-form";
 import { generateSessionsAction } from "@/lib/actions/admin";
 import { formatFrenchLong, occupancyLabel, padRumpNumber } from "@/lib/dates";
 import { getAdminOverview } from "@/lib/queries";
-import { getFirstSessionDate } from "@/lib/settings";
+import { getSeasonBounds } from "@/lib/settings";
 import { SLOTS_PER_SESSION } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const [{ upcoming, pending }, firstSessionDate] = await Promise.all([
+  const [{ upcoming, pending }, { first, last }] = await Promise.all([
     getAdminOverview(),
-    getFirstSessionDate(),
+    getSeasonBounds(),
   ]);
 
   return (
@@ -27,13 +27,13 @@ export default async function AdminPage() {
           </Link>
           <form action={generateSessionsAction}>
             <button className="btn btn-ghost" type="submit">
-              Générer 12 jeudis
+              Régénérer la saison
             </button>
           </form>
         </div>
       </header>
 
-      <FirstSessionForm currentDate={firstSessionDate} />
+      <FirstSessionForm firstDate={first} lastDate={last} />
 
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="border border-line px-4 py-4">

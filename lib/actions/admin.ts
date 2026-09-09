@@ -4,7 +4,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { applyFirstSessionDate, ensureUpcomingSessions } from "@/lib/sessions";
+import { applySeasonDates, ensureUpcomingSessions } from "@/lib/sessions";
 import { talkApplications } from "@/db/schema";
 
 async function requireAdmin() {
@@ -120,7 +120,7 @@ export async function rejectApplication(formData: FormData) {
 
 export async function generateSessionsAction() {
   await requireAdmin();
-  await ensureUpcomingSessions(12);
+  await ensureUpcomingSessions();
   revalidatePublic();
 }
 
@@ -129,27 +129,28 @@ export type FirstSessionState = {
   success?: string;
 };
 
-export async function setFirstSessionDateAction(
+export async function setSeasonDatesAction(
   _prev: FirstSessionState | undefined,
   formData: FormData,
 ): Promise<FirstSessionState> {
   await requireAdmin();
 
-  const date = String(formData.get("firstSessionDate") ?? "").trim();
+  const firstDate = String(formData.get("firstSessionDate") ?? "").trim();
+  const lastDate = String(formData.get("lastSessionDate") ?? "").trim();
 
   try {
-    await applyFirstSessionDate(date);
+    await applySeasonDates(firstDate, lastDate);
   } catch (error) {
     return {
       error:
         error instanceof Error
           ? error.message
-          : "Impossible d'enregistrer cette date.",
+          : "Impossible d'enregistrer ces dates.",
     };
   }
 
   revalidatePublic();
   return {
-    success: "Première RUMP enregistrée. Le planning a été régénéré.",
+    success: "Saison enregistrée. Le planning a été régénéré.",
   };
 }

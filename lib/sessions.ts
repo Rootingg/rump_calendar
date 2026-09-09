@@ -1,8 +1,12 @@
-import { asc, desc, eq, inArray, lt } from "drizzle-orm";
+import { asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
 import { BOOKABLE_SLOTS } from "@/lib/constants";
-import { getUpcomingThursdays, isThursdayIso, isThursdayOver } from "@/lib/dates";
+import { getThursdaysBetween, isThursdayIso, isThursdayOver } from "@/lib/dates";
 import { db } from "@/lib/db";
-import { getFirstSessionDate, saveFirstSessionDate } from "@/lib/settings";
+import {
+  getSeasonBounds,
+  saveFirstSessionDate,
+  saveLastSessionDate,
+} from "@/lib/settings";
 import { rumpSessions, slots } from "@/db/schema";
 
 export async function closePastSessions() {
@@ -65,45 +69,58 @@ async function renumberSessions() {
   }
 }
 
-export async function ensureUpcomingSessions(weeks = 12) {
+export async function ensureUpcomingSessions() {
   await closePastSessions();
 
-  const firstDate = await getFirstSessionDate();
-  const dates = getUpcomingThursdays(weeks, firstDate);
+  const { first, last } = await getSeasonBounds();
+  const dates = getThursdaysBetween(first, last);
   const existing = await db.select().from(rumpSessions);
   const existingDates = new Set(existing.map((session) => session.date));
   const missing = dates.filter((date) => !existingDates.has(date));
 
-  if (missing.length === 0) {
-    await renumberSessions();
-    return;
-  }
+  if (missing.length > 0) {
+    const [latest] = await db
+      .select({ number: rumpSessions.number })
+      .from(rumpSessions)
+      .orderBy(desc(rumpSessions.number))
+      .limit(1);
 
-  const [latest] = await db
-    .select({ number: rumpSessions.number })
-    .from(rumpSessions)
-    .orderBy(desc(rumpSessions.number))
-    .limit(1);
+    let nextNumber = (latest?.number ?? 0) + 1;
 
-  let nextNumber = (latest?.number ?? 0) + 1;
-
-  for (const date of missing) {
-    await createSession(date, nextNumber);
-    nextNumber += 1;
+    for (const date of missing) {
+      await createSession(date, nextNumber);
+      nextNumber += 1;
+    }
   }
 
   await renumberSessions();
 }
 
-export async function applyFirstSessionDate(date: string) {
+function assertThursdayIso(date: string, label: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    throw new Error("Date invalide.");
+    throw new Error(`${label} : date invalide.`);
   }
   if (!isThursdayIso(date)) {
-    throw new Error("La première RUMP doit tomber un jeudi.");
+    throw new Error(`${label} doit tomber un jeudi.`);
+  }
+}
+
+export async function applySeasonDates(firstDate: string, lastDate: string) {
+  assertThursdayIso(firstDate, "La date de début");
+  assertThursdayIso(lastDate, "La date de fin");
+
+  if (lastDate < firstDate) {
+    throw new Error("La date de fin doit être après la date de début.");
   }
 
-  await saveFirstSessionDate(date);
-  await db.delete(rumpSessions).where(lt(rumpSessions.date, date));
-  await ensureUpcomingSessions(12);
+  await saveFirstSessionDate(firstDate);
+  await saveLastSessionDate(lastDate);
+  await db.delete(rumpSessions).where(lt(rumpSessions.date, firstDate));
+  await db.delete(rumpSessions).where(gt(rumpSessions.date, lastDate));
+  await ensureUpcomingSessions();
+}
+
+export async function applyFirstSessionDate(date: string) {
+  const { last } = await getSeasonBounds();
+  await applySeasonDates(date, last);
 }

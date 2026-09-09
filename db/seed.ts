@@ -4,8 +4,11 @@ import { eq, ne } from "drizzle-orm";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
-import { DEFAULT_FIRST_SESSION_DATE } from "../lib/settings";
-import { applyFirstSessionDate } from "../lib/sessions";
+import {
+  DEFAULT_FIRST_SESSION_DATE,
+  DEFAULT_LAST_SESSION_DATE,
+} from "../lib/settings";
+import { applySeasonDates } from "../lib/sessions";
 
 loadEnvConfig(process.cwd());
 
@@ -64,7 +67,7 @@ async function deleteMemberAccounts(adminId: string) {
 async function main() {
   const adminId = await upsertAdmin();
   await deleteMemberAccounts(adminId);
-  await applyFirstSessionDate(DEFAULT_FIRST_SESSION_DATE);
+  await applySeasonDates(DEFAULT_FIRST_SESSION_DATE, DEFAULT_LAST_SESSION_DATE);
 
   console.log("Seed complete. Only admin remains.");
   console.log("Admin : admin@oterihack.fr");

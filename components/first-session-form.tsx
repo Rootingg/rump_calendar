@@ -2,42 +2,62 @@
 
 import { useActionState } from "react";
 import {
-  setFirstSessionDateAction,
+  setSeasonDatesAction,
   type FirstSessionState,
 } from "@/lib/actions/admin";
 import { formatFrenchLong } from "@/lib/dates";
 
-export function FirstSessionForm({ currentDate }: { currentDate: string }) {
+export function FirstSessionForm({
+  firstDate,
+  lastDate,
+}: {
+  firstDate: string;
+  lastDate: string;
+}) {
   const [state, action, pending] = useActionState<
     FirstSessionState | undefined,
     FormData
-  >(setFirstSessionDateAction, undefined);
+  >(setSeasonDatesAction, undefined);
 
   return (
     <form action={action} className="space-y-4 border border-line px-5 py-5">
       <div>
         <p className="text-[11px] uppercase tracking-[0.16em] text-gold">
-          Première session
+          Saison
         </p>
-        <h2 className="mt-2 font-display text-2xl italic">Date de la RUMP #01</h2>
+        <h2 className="mt-2 font-display text-2xl italic">Début et fin des RUMPs</h2>
         <p className="mt-2 text-sm text-muted">
-          Actuellement {formatFrenchLong(currentDate)}. Les jeudis avant cette
-          date sont retirés du planning. Les candidatures liées à ces jeudis
-          sont supprimées.
+          Du {formatFrenchLong(firstDate)} au {formatFrenchLong(lastDate)}. Les
+          jeudis hors de cette période sont retirés du planning, ainsi que leurs
+          candidatures.
         </p>
       </div>
-      <label className="block max-w-xs">
-        <span className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-muted">
-          Jeudi de démarrage
-        </span>
-        <input
-          className="field"
-          type="date"
-          name="firstSessionDate"
-          defaultValue={currentDate}
-          required
-        />
-      </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-muted">
+            Jeudi de démarrage
+          </span>
+          <input
+            className="field"
+            type="date"
+            name="firstSessionDate"
+            defaultValue={firstDate}
+            required
+          />
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-muted">
+            Jeudi de fin
+          </span>
+          <input
+            className="field"
+            type="date"
+            name="lastSessionDate"
+            defaultValue={lastDate}
+            required
+          />
+        </label>
+      </div>
       {state?.error ? <p className="text-sm text-bad">{state.error}</p> : null}
       {state?.success ? <p className="text-sm text-ok">{state.success}</p> : null}
       <button className="btn" type="submit" disabled={pending}>
