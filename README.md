@@ -11,16 +11,13 @@ Next.js · Vercel · Neon (Postgres) · Drizzle · Auth.js
 ```bash
 npm install
 cp .env.example .env.local
-# renseigner DATABASE_URL, DATABASE_URL_UNPOOLED, AUTH_SECRET
+# renseigner DATABASE_URL, DATABASE_URL_UNPOOLED, AUTH_SECRET, ADMIN_PASSWORD
 npm run db:push
 npm run db:seed
 npm run dev
 ```
 
-## Comptes de démo (après seed)
-
-- Admin : `admin@oterihack.fr` / `AdminRump2026`
-- Membre : `lucas@oterihack.fr` / `DemoRump2026`
+Un seul compte est créé : `admin@oterihack.fr` (mot de passe = `ADMIN_PASSWORD`).
 
 ## Vercel
 
@@ -32,3 +29,4 @@ Variables d’environnement à ajouter dans le projet Vercel :
 - `DATABASE_URL_UNPOOLED`
 - `AUTH_SECRET`
 - `AUTH_TRUST_HOST=true`
+- `ADMIN_PASSWORD` (uniquement pour le seed local)
