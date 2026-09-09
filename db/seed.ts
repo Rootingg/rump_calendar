@@ -9,12 +9,13 @@ import { applyFirstSessionDate } from "../lib/sessions";
 
 loadEnvConfig(process.cwd());
 
-const url = process.env.DATABASE_URL;
+const url = process.env.DATABASE_URL ?? "";
+const adminPassword = process.env.ADMIN_PASSWORD ?? "";
+
 if (!url) {
   throw new Error("DATABASE_URL is not set");
 }
 
-const adminPassword = process.env.ADMIN_PASSWORD;
 if (!adminPassword) {
   throw new Error("ADMIN_PASSWORD is not set");
 }
