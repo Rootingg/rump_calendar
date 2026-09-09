@@ -11,7 +11,18 @@ const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
+if (!process.env.AUTH_URL && !process.env.NEXTAUTH_URL) {
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    process.env.AUTH_URL = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  } else if (process.env.VERCEL) {
+    process.env.AUTH_URL = "https://rump.oterihack.com";
+  }
+}
+
+const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret,
   trustHost: true,
   session: { strategy: "jwt" },
   pages: {
