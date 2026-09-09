@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { TalkTimeline } from "@/components/talk-timeline";
-import { formatFrenchLong, padRumpNumber } from "@/lib/dates";
+import { formatFrenchLong, padRumpNumber, talkLabel } from "@/lib/dates";
 import { getApprovedTalks, getNextPublicSession, getSessionDetail } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -30,9 +30,7 @@ export default async function HomePage() {
               {formatFrenchLong(detail.session.date)}
             </h2>
             <p className="mt-1 font-mono text-sm text-muted">
-              RUMP #{padRumpNumber(detail.session.number)} · {detail.approvedCount} talk
-              {detail.approvedCount > 1 ? "s" : ""} confirmé
-              {detail.approvedCount > 1 ? "s" : ""}
+              RUMP #{padRumpNumber(detail.session.number)} · {talkLabel(detail.approvedCount)}
             </p>
             <div className="mt-6">
               <TalkTimeline slots={detail.slots} />

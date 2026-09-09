@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { SessionTone } from "@/components/status-badge";
-import { formatFrenchLong, formatMonthYear, padRumpNumber } from "@/lib/dates";
+import {
+  formatFrenchLong,
+  formatMonthYear,
+  padRumpNumber,
+  slotLabel,
+  talkLabel,
+} from "@/lib/dates";
 import { getPlanningSessions } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -49,17 +55,10 @@ export default async function PlanningPage() {
                   {session.approvedCount === 0 ? (
                     <p>Aucun talk</p>
                   ) : (
-                    <p>
-                      {session.approvedCount} talk{session.approvedCount > 1 ? "s" : ""}{" "}
-                      confirmé{session.approvedCount > 1 ? "s" : ""}
-                    </p>
+                    <p>{talkLabel(session.approvedCount)}</p>
                   )}
                   {session.status !== "DONE" ? (
-                    <p className="mt-1 text-xs">
-                      {session.availableCount} créneau
-                      {session.availableCount > 1 ? "x" : ""} disponible
-                      {session.availableCount > 1 ? "s" : ""}
-                    </p>
+                    <p className="mt-1 text-xs">{slotLabel(session.availableCount)}</p>
                   ) : (
                     <p className="mt-1 text-xs uppercase tracking-[0.14em]">Terminée</p>
                   )}

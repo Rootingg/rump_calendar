@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StatusBadge } from "@/components/status-badge";
 import { TalkTimeline } from "@/components/talk-timeline";
-import { formatFrenchLong, padRumpNumber } from "@/lib/dates";
+import { formatFrenchLong, padRumpNumber, slotLabel, talkLabel } from "@/lib/dates";
 import { getSessionDetail } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +33,7 @@ export default async function RumpPage({
           <span>18:00 → 19:00</span>
           <StatusBadge status={detail.session.status} />
           <span>
-            {detail.approvedCount} talk{detail.approvedCount > 1 ? "s" : ""} ·{" "}
-            {detail.availableCount} libre{detail.availableCount > 1 ? "s" : ""}
+            {talkLabel(detail.approvedCount)} · {slotLabel(detail.availableCount)}
           </span>
         </div>
       </div>

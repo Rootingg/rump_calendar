@@ -100,3 +100,13 @@ export function formatMonthYear(iso: string) {
 export function padRumpNumber(number: number) {
   return String(number).padStart(2, "0");
 }
+
+export function talkLabel(count: number) {
+  return count <= 1 ? `${count} talk confirmé` : `${count} talks confirmés`;
+}
+
+export function slotLabel(count: number) {
+  return count <= 1
+    ? `${count} créneau disponible`
+    : `${count} créneaux disponibles`;
+}
